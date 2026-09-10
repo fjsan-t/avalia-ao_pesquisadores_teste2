@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avaliação das Apresentações</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f9f6f4; margin: 0; padding: 15px; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; background: #fff0e7; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #361b0c; font-size: 1.6rem; margin-bottom: 25px; }
+        
+
+        .card-trabalho { background: #fffaf6; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .card-trabalho h3 { margin: 0 0 5px 0; color: #0c0d0f; font-size: 1.1rem; }
+        .autor { font-weight: bold; color: #3d2312; font-size: 0.9rem; margin-bottom: 8px; }
+        .resumo { font-size: 0.88rem; color: #302a23; line-height: 1.4; margin-bottom: 15px; }
+        
+    
+        .label-nota { font-size: 0.85rem; font-weight: bold; display: block; margin-bottom: 8px; }
+        .escala-notas { display: flex; gap: 4px; justify-content: space-between; }
+        .btn-nota { flex: 1; height: 40px; border: 1px solid #cbd5e0; background: white; border-radius: 6px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
+        .btn-nota:hover { background: #edf2f7; }
+        .btn-nota.selecionado { background: #704a25; color: white; border-color: #2c1f0b; transform: scale(1.05); }
+
+    
+        .secao-final { margin-top: 30px; border-top: 2px solid #e2e8f0; padding-top: 20px; }
+        .campo-email label { font-weight: bold; display: block; margin-bottom: 8px; color: #2d3748; }
+        .campo-email input { width: 100%; padding: 12px; border: 2px solid #cbd5e0; border-radius: 6px; box-sizing: border-box; font-size: 1rem; margin-bottom: 15px; }
+        
+        .btn-enviar { width: 100%; background: #704a25; color: white; border: none; padding: 15px; font-size: 1.1rem; font-weight: bold; border-radius: 6px; cursor: pointer; }
+        .btn-enviar:hover { background: #704a25; }
+        
+        #mensagem { margin-top: 15px; padding: 12px; border-radius: 6px; text-align: center; font-weight: bold; display: none; }
+        .sucesso { background: #c6f6d5; color: #151f1a; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Avaliação das Apresentações</h1>
+
+  
+    <div id="containerApresentacoes"></div>
+
+    <div class="secao-final">I
+        <div class="campo-email">
+            <label for="email">Informe seu e-mail para concluir e registrar os votos:</label>
+            <input type="email" id="email" placeholder="seuemail@exemplo.com" required>
+        </div>
+
+        <button class="btn-enviar" onclick="enviarVotacao()">Concluir e Enviar Votação</button>
+        <div id="mensagem"></div>
+    </div>
+</div>
+
+<script>
+
+    const trabalhos = [
+        {
+            id: 1,
+            titulo: "Titulo da apresenação 1",
+            autor: "Fulano de Tal",
+            resumo: "Resumo sobre o trabalho apresentado."
+        },
+        {
+            id: 2,
+            titulo: "Titulo da apresenação 2",
+            autor: "Fulano de Tal",
+            resumo: "Resumo sobre o trabalho apresentado."
+        },
+        {
+            id: 3,
+            titulo: "Titulo da apresenação 3",
+            autor: "Fulano de Tal",
+            resumo: "Resumo sobre o trabalho apresentado."
+        }
+    ];
+
+    let notasSelecionadas = {};
+
+    window.onload = function() {
+        renderizarApresentacoes(trabalhos);
+    };
+
+    function renderizarApresentacoes(lista) {
+        const container = document.getElementById('containerApresentacoes');
+        container.innerHTML = '';
+
+        lista.forEach(trab => {
+            const card = document.createElement('div');
+            card.className = 'card-trabalho';
+
+            let botoesHTML = '';
+            for (let i = 5; i <= 50; i+=5) {
+                botoesHTML += `<button type="button" class="btn-nota" onclick="selecionarNota(${trab.id}, ${i}, this)">${i}</button>`;
+            }
+
+            card.innerHTML = `
+                <h3>${trab.titulo}</h3>
+                <div class="autor">Apresentador: ${trab.autor}</div>
+                <div class="resumo">${trab.resumo}</div>
+                <span class="label-nota">Atribua sua nota (5 a 50):</span>
+                <div class="escala-notas" id="escala-${trab.id}">
+                    ${botoesHTML}
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function selecionarNota(trabalhoId, nota, elemento) {
+        notasSelecionadas[trabalhoId] = nota;
+
+        const containerPai = document.getElementById(`escala-${trabalhoId}`);
+        const botoes = containerPai.querySelectorAll('.btn-nota');
+        botoes.forEach(btn => btn.classList.remove('selecionado'));
+
+        elemento.classList.add('selecionado');
+    }
+
+    const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbw4z_jQNCJ9OkqrwBt3ZwdbynfiMeVe3_OVM0bowjGcsX8wkMwXuZVa0EUSTwAReYQY/exec";
+
+    function enviarVotacao() {
+        const email = document.getElementById('email').value.trim();
+
+        if (!email) {
+            alert("Digite seu e-mail.");
+            return;
+        }
+
+        fetch(URL_APPS_SCRIPT, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email: email,
+                votos: notasSelecionadas
+            })
+        })
+        .then(() => alert("Voto registrado com sucesso!"))
+        .catch(() => alert("Erro ao enviar. Verifique sua conexão."));
+    }
+</script>
+
+</body>
+</html>
